@@ -1,0 +1,21 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "rustgate-backend"
+version = "0.1.0"
+description = "Python bindings and backend package for rustgate"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.136.3",
+    "uvicorn>=0.48.0",
+]
+
+[dependency-groups]
+dev = []
+
+[tool.maturin]
+manifest-path = "../bindings/Cargo.toml"
+python-source = "."
+module-name = "src.rustgate_bindings"
