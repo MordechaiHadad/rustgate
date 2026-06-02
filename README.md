@@ -112,3 +112,21 @@ Results:
 | p99                     | 183.6 ms      |
 | Rate-limited (429)      | 33713         |
 | Successful (200)        | 40            |
+
+Comparison with the lightweight `GET /health` endpoint (no rate limiting, no
+token counting, no model rerouting, just a fast return):
+
+    oha -z 30s -c 100 -m GET http://localhost:8001/health
+
+| Metric                  | Value         |
+|-------------------------|---------------|
+| Duration                | 30.00 s       |
+| Requests/sec            | 1496.39       |
+| Fastest latency         | 13.70 ms      |
+| Average latency         | 66.90 ms      |
+| Slowest latency         | 1.89 s        |
+| p50                     | 51.10 ms      |
+| p90                     | 58.80 ms      |
+| p95                     | 73.40 ms      |
+| p99                     | 656.30 ms     |
+| Successful (200)        | 44796         |
