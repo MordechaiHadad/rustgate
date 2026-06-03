@@ -9,6 +9,7 @@ OUT="results.txt"
 for c in 100 500 1000 2000 5000; do
     echo "[$(date +%H:%M:%S)] Flushing Redis..."
     redis-cli FLUSHALL
+    redis-cli BGREWRITEAOF
     redis-cli SAVE
     
     echo "[$(date +%H:%M:%S)] Waiting 8s..."
