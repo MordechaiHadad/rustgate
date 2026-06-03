@@ -10,10 +10,16 @@ requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.136.3",
     "uvicorn[standard]>=0.48.0",
+    "tiktoken>=0.9.0",
+    "redis[hiredis]>=5.2.0",
 ]
 
 [dependency-groups]
 dev = []
+
+[project.scripts]
+server-py = "src:server_py"
+server-rust = "src:server_rust"
 
 [tool.maturin]
 manifest-path = "../bindings/Cargo.toml"
