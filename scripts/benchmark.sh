@@ -9,7 +9,7 @@ OUT="results.txt"
 for c in 100 500 1000 2000 5000; do
     echo "[$(date +%H:%M:%S)] Flushing Redis..."
     redis-cli FLUSHALL
-    redis-cli BGREWRITEAOF
+    redis-cli KEYS "rate_limit:*" | xargs redis-cli DEL
     redis-cli SAVE
 
     # Verify DBSIZE is 0 before proceeding
