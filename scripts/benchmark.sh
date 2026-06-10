@@ -17,11 +17,6 @@ echo "Target Machine IP: $REMOTE_HOST"
 echo "================================================="
 
 for c in 100 500 1000 2000 5000; do
-    echo "[$(date +%H:%M:%S)] Clearing rate limit key on remote Redis..."
-    
-    # Drops the rate-limit tracking key matching the machine's IP
-    redis-cli -h "$REMOTE_HOST" -p "$REDIS_PORT" DEL "rate_limit:ai:${REMOTE_HOST}"
-    
     echo "[$(date +%H:%M:%S)] Running $LABEL @ $c (churn: ${CHURN:-off})"
     
     echo "=== $LABEL | $c connections | churn: ${CHURN:-off} ===" | tee -a "$OUT"
@@ -36,7 +31,8 @@ for c in 100 500 1000 2000 5000; do
     echo "[$(date +%H:%M:%S)] Done with $c"
     echo ""
     
-    sleep 2
+    echo "[$(date +%H:%M:%S)] Waiting for 2 minutes"
+    sleep 2m
 done
 
 echo "[$(date +%H:%M:%S)] All done for $LABEL"
