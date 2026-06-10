@@ -103,6 +103,8 @@ Test setup (run from `scripts/`):
 Each concurrency level runs for 30 s with `--disable-keepalive` (churn mode)
 and a 70 s cool-down between runs.
 
+**Test machine:** Intel Core i5-10400F @ 2.90 GHz (6 cores / 12 threads), 16 GB RAM.
+
 ### POST /models/auto (rate-limited endpoint)
 
 | Connections | Backend | Requests/sec | Avg latency | p50      | p99      | Success rate |
