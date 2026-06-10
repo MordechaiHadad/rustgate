@@ -12,7 +12,7 @@ from src._common import RUSTGATE_REDIS_URL, client_identifier
 
 logger = logging.getLogger(__name__)
 
-AI_WINDOW_SECONDS = 120
+AI_WINDOW_SECONDS = 60 
 TOTAL_AI_QUOTA_UNITS = 5000
 GPT_4_COST_UNITS_PER_TOKEN = 1
 GPT_5_COST_UNITS_PER_TOKEN = 25
