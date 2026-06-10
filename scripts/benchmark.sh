@@ -16,7 +16,7 @@ echo "================================================="
 echo "Target Machine IP: $REMOTE_HOST"
 echo "================================================="
 
-for c in 100 500 1000 2000 5000; do
+for c in 100 500 1000 2000 5000 10000; do
     echo "[$(date +%H:%M:%S)] Running $LABEL @ $c (churn: ${CHURN:-off})"
     
     echo "=== $LABEL | $c connections | churn: ${CHURN:-off} ===" | tee -a "$OUT"
