@@ -1,22 +1,36 @@
 #!/bin/bash
 
-LABEL="${1:-test}"
-CHURN="${2:-}"
+# Configuration
+REMOTE_HOST="${1:?Error: Please provide the remote desktop IP address (e.g., 10.0.0.6)}"
+LABEL="${2:-test}"
+CHURN="${3:-}"
 OUT="results.txt"
+
+# Port configurations
+HTTP_PORT="8000"
+REDIS_PORT="6379"
 
 [ "$CHURN" ] && FLAG="--disable-keepalive" || FLAG=""
 
+echo "================================================="
+echo "Target Machine IP: $REMOTE_HOST"
+echo "================================================="
+
 for c in 100 500 1000 2000 5000; do
-    echo "[$(date +%H:%M:%S)] Clearing rate limit key..."
-    redis-cli DEL "rate_limit:ai:127.0.0.1"
+    echo "[$(date +%H:%M:%S)] Clearing rate limit key on remote Redis..."
+    
+    # Drops the rate-limit tracking key matching the machine's IP
+    redis-cli -h "$REMOTE_HOST" -p "$REDIS_PORT" DEL "rate_limit:ai:${REMOTE_HOST}"
     
     echo "[$(date +%H:%M:%S)] Running $LABEL @ $c (churn: ${CHURN:-off})"
     
     echo "=== $LABEL | $c connections | churn: ${CHURN:-off} ===" | tee -a "$OUT"
+    
+    # Executes the load test against the remote FastAPI endpoint
     oha -z 30s -c "$c" --no-tui $FLAG \
         -m POST \
         -d '{"query": "This is my grand query"}' \
-        http://localhost:8000/models/auto 2>&1 | tee -a "$OUT"
+        "http://${REMOTE_HOST}:${HTTP_PORT}/models/auto" 2>&1 | tee -a "$OUT"
     
     echo "" | tee -a "$OUT"
     echo "[$(date +%H:%M:%S)] Done with $c"
