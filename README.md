@@ -90,43 +90,45 @@ The Rust layer supports two model families:
 Models like `gpt-4o`, `gpt-4o-mini`, `gpt-5-mini`, or `o3` are not currently
 supported and will return a 400 error.
 
-Benchmark (sample load test)
-----------------------------
-Load test with oha against the POST /models/auto endpoint:
+Benchmark
+---------
+Load tests run with [oha](https://github.com/hatoo/oha) against
+`POST /models/auto` (token-aware rate limiting) and `GET /health` (baseline),
+comparing the Python (`py`) and Rust (`rust`) backends.
 
-    oha -z 30s -c 100 -m POST -d '{"query": "This is my grand query"}' \
-      http://localhost:8001/models/auto
+Test setup (run from `scripts/`):
 
-Results:
+    ./benchmark.sh <REMOTE_HOST> py churn
 
-| Metric                  | Value         |
-|-------------------------|---------------|
-| Duration                | 30.01 s       |
-| Requests/sec            | 1128.10       |
-| Fastest latency         | 15.34 ms      |
-| Average latency         | 88.76 ms      |
-| Slowest latency         | 774.95 ms     |
-| p50                     | 75.0 ms       |
-| p90                     | 152.1 ms      |
-| p95                     | 168.36 ms     |
-| p99                     | 183.6 ms      |
-| Rate-limited (429)      | 33713         |
-| Successful (200)        | 40            |
+Each concurrency level runs for 30 s with `--disable-keepalive` (churn mode)
+and a 70 s cool-down between runs.
 
-Comparison with the lightweight `GET /health` endpoint (no rate limiting, no
-token counting, no model rerouting, just a fast return):
+### POST /models/auto (rate-limited endpoint)
 
-    oha -z 30s -c 100 -m GET http://localhost:8001/health
+| Connections | Backend | Requests/sec | Avg latency | p50      | p99      | Success rate |
+|-------------|---------|--------------|-------------|----------|----------|--------------|
+| 100         | py      | 839          | 119.35 ms   | 90.41 ms | 460.57 ms| 100.00%      |
+| 100         | rust    | 856          | 104.60 ms   | 75.70 ms | 717.00 ms| 100.00%      |
+| 500         | py      | 872          | 579.50 ms   | 462.30 ms| 1.88 s   | 100.00%      |
+| 500         | rust    | 995          | 505.40 ms   | 413.40 ms| 1.45 s   | 100.00%      |
+| 1000        | py      | 912          | 1.11 s      | 978.70 ms| 2.67 s   | 100.00%      |
+| 1000        | rust    | 1006         | 101.10 ms   | 85.20 ms | 272.20 ms| 100.00%      |
+| 2000        | py      | 942          | 2.20 s      | 2.03 s   | 3.97 s   | 100.00%      |
+| 2000        | rust    | 1032         | 1.99 s      | 1.87 s   | 3.39 s   | 100.00%      |
+| 5000        | py      | 1043         | 4.01 s      | 3.21 s   | 18.06 s  | 95.96%       |
+| 5000        | rust    | 1113         | 3.97 s      | 2.88 s   | 20.46 s  | 98.80%       |
+| 10000       | py      | 1279         | 5.30 s      | 4.12 s   | 24.55 s  | 87.90%       |
+| 10000       | rust    | 1334         | 5.22 s      | 3.95 s   | 21.74 s  | 89.75%       |
 
-| Metric                  | Value         |
-|-------------------------|---------------|
-| Duration                | 30.00 s       |
-| Requests/sec            | 1496.39       |
-| Fastest latency         | 13.70 ms      |
-| Average latency         | 66.90 ms      |
-| Slowest latency         | 1.89 s        |
-| p50                     | 51.10 ms      |
-| p90                     | 58.80 ms      |
-| p95                     | 73.40 ms      |
-| p99                     | 656.30 ms     |
-| Successful (200)        | 44796         |
+At 5000+ connections both backends begin hitting OS/connection limits;
+the Rust backend sustains a higher success rate under extreme load.
+
+### GET /health (baseline, no rate limiting)
+
+| Backend | Requests/sec | Avg latency | p50      | p99      |
+|---------|--------------|-------------|----------|----------|
+| py      | 3330         | 30.02 ms    | 26.98 ms | 67.32 ms |
+| rust    | 3103         | 32.17 ms    | 27.05 ms | 129.17 ms|
+
+The health endpoint bypasses all rate limiting and token counting, giving a
+raw throughput ceiling for comparison.
