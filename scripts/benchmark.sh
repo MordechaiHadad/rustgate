@@ -31,8 +31,8 @@ for c in 100 500 1000 2000 5000 10000; do
     echo "[$(date +%H:%M:%S)] Done with $c"
     echo ""
     
-    echo "[$(date +%H:%M:%S)] Waiting for 2 minutes"
-    sleep 2m
+    echo "[$(date +%H:%M:%S)] Waiting for 1:10 minute"
+    sleep 70
 done
 
 echo "[$(date +%H:%M:%S)] All done for $LABEL"
