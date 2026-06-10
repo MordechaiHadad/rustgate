@@ -132,3 +132,5 @@ the Rust backend sustains a higher success rate under extreme load.
 
 The health endpoint bypasses all rate limiting and token counting, giving a
 raw throughput ceiling for comparison.
+
+![results_image](scripts/results.png)
