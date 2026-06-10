@@ -27,8 +27,8 @@ return current
 
 _redis = Redis.from_url(
     RUSTGATE_REDIS_URL,
-    protocol=None if sys.platform.startswith("linux") else 2,
-    max_connections=6000,
+    protocol=2,
+    max_connections=10000,
 )
 
 
