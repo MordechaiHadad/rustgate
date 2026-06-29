@@ -1,5 +1,3 @@
-import json
-
 from fastapi import Depends, FastAPI, HTTPException, Request
 from src._common import RUSTGATE_REDIS_URL, client_identifier, extract_query
 from src.rustgate_bindings import RedisAiLimiter
@@ -22,8 +20,7 @@ def rate_limit(*models: str):
         identifier = client_identifier(request)
 
         for model in models:
-            payload = json.dumps({"model": model, "query": query}).encode()
-            allowed = await limiter.allow(identifier, payload)
+            allowed = await limiter.allow(identifier, model, query)
             if allowed:
                 request.state.allowed_model = model
                 return

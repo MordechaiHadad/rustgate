@@ -833,6 +833,7 @@ dependencies = [
  "axum-rate-limiter",
  "pyo3",
  "redis",
+ "serde_json",
  "tokio",
 ]
 

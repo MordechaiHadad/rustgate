@@ -12,6 +12,7 @@ use axum_rate_limiter::{
     },
 };
 use pyo3::{Bound, exceptions::PyRuntimeError, prelude::*, types::PyModule};
+use serde_json::json;
 use tokio::runtime::Runtime;
 
 fn to_py_runtime_error(error: impl std::fmt::Display) -> PyErr {
@@ -144,15 +145,19 @@ impl PyRedisAiLimiter {
         })
     }
 
-    async fn allow(&self, identifier: String, body: Vec<u8>) -> PyResult<bool> {
-        let usage = extract_ai_usage_inner(&body)
+    async fn allow(&self, identifier: &str, model: &str, query: &str) -> PyResult<bool> {
+        let body = json!({"model": model, "query": query}).to_string();
+        let usage = extract_ai_usage_inner(body.as_bytes())
             .map_err(|error| to_py_runtime_error(ai_request_error_to_string(&error)))?;
         let limiter = Arc::clone(&self.inner);
         let handle = self.runtime.handle().clone();
 
         let context_aware_fut = TokioContextFuture {
             handle,
-            future: async move { limiter.allow(&identifier, &usage).await },
+            future: async move {
+                let id = identifier.to_string();
+                limiter.allow(&id, &usage).await
+            },
         };
 
         Ok(context_aware_fut.await)
@@ -169,7 +174,7 @@ impl PyRedisAiLimiter {
 }
 
 #[pyfunction]
-fn extract_ai_usage(body: Vec<u8>) -> PyResult<PyAiUsage> {
+fn extract_ai_usage(body: &[u8]) -> PyResult<PyAiUsage> {
     let usage = extract_ai_usage_inner(&body)
         .map_err(|error| to_py_runtime_error(ai_request_error_to_string(&error)))?;
     Ok(PyAiUsage { inner: usage })
