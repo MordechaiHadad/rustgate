@@ -55,11 +55,11 @@ impl PyRedisLimiter {
         })
     }
 
-    fn allow(&self, identifier: String) -> bool {
+    fn allow(&self, py: Python<'_>, identifier: String) -> bool {
         let limiter = Arc::clone(&self.inner);
         let runtime = Arc::clone(&self.runtime);
 
-        runtime.block_on(async move { limiter.allow(&identifier).await })
+        py.detach(|| runtime.block_on(async move { limiter.allow(&identifier).await }))
     }
 
     fn __repr__(&self) -> String {
@@ -149,18 +149,17 @@ impl PyRedisAiLimiter {
         let body = json!({"model": model, "query": query}).to_string();
         let usage = extract_ai_usage_inner(body.as_bytes())
             .map_err(|error| to_py_runtime_error(ai_request_error_to_string(&error)))?;
+
         let limiter = Arc::clone(&self.inner);
-        let handle = self.runtime.handle().clone();
+        let id = identifier.to_string();
 
-        let context_aware_fut = TokioContextFuture {
-            handle,
-            future: async move {
-                let id = identifier.to_string();
-                limiter.allow(&id, &usage).await
-            },
-        };
+        let join_handle = self
+            .runtime
+            .spawn(async move { limiter.allow(&id, &usage).await });
 
-        Ok(context_aware_fut.await)
+        join_handle
+            .await
+            .map_err(|err| to_py_runtime_error(format!("tokio task panicked: {err}")))
     }
 
     fn __repr__(&self) -> String {
@@ -175,7 +174,7 @@ impl PyRedisAiLimiter {
 
 #[pyfunction]
 fn extract_ai_usage(body: &[u8]) -> PyResult<PyAiUsage> {
-    let usage = extract_ai_usage_inner(&body)
+    let usage = extract_ai_usage_inner(body)
         .map_err(|error| to_py_runtime_error(ai_request_error_to_string(&error)))?;
     Ok(PyAiUsage { inner: usage })
 }
