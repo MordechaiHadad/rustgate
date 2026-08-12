@@ -107,23 +107,22 @@ and a 70 s cool-down between runs.
 
 ### POST /models/auto (rate-limited endpoint)
 
-| Connections | Backend | Requests/sec | Avg latency | p50      | p99      | Success rate |
-|-------------|---------|--------------|-------------|----------|----------|--------------|
-| 100         | py      | 839          | 119.35 ms   | 90.41 ms | 460.57 ms| 100.00%      |
-| 100         | rust    | 856          | 104.60 ms   | 75.70 ms | 717.00 ms| 100.00%      |
-| 500         | py      | 872          | 579.50 ms   | 462.30 ms| 1.88 s   | 100.00%      |
-| 500         | rust    | 995          | 505.40 ms   | 413.40 ms| 1.45 s   | 100.00%      |
-| 1000        | py      | 912          | 1.11 s      | 978.70 ms| 2.67 s   | 100.00%      |
-| 1000        | rust    | 1006         | 101.10 ms   | 85.20 ms | 272.20 ms| 100.00%      |
-| 2000        | py      | 942          | 2.20 s      | 2.03 s   | 3.97 s   | 100.00%      |
-| 2000        | rust    | 1032         | 1.99 s      | 1.87 s   | 3.39 s   | 100.00%      |
-| 5000        | py      | 1043         | 4.01 s      | 3.21 s   | 18.06 s  | 95.96%       |
-| 5000        | rust    | 1113         | 3.97 s      | 2.88 s   | 20.46 s  | 98.80%       |
-| 10000       | py      | 1279         | 5.30 s      | 4.12 s   | 24.55 s  | 87.90%       |
-| 10000       | rust    | 1334         | 5.22 s      | 3.95 s   | 21.74 s  | 89.75%       |
+| Connections | Backend | Requests/sec | Avg latency | p50 | p99 | Success rate |
+| --- | --- | --- | --- | --- | --- | --- |
+| 100 | py | 1314 | 76.20 ms | 69.30 ms | 177.60 ms | 100.00% |
+| 100 | rust | 1555 | 64.33 ms | 63.89 ms | 82.15 ms | 100.00% |
+| 500 | py | 1458 | 344.40 ms | 344.30 ms | 370.50 ms | 100.00% |
+| 500 | rust | 1611 | 311.50 ms | 312.30 ms | 346.20 ms | 100.00% |
+| 1000 | py | 1491 | 677.50 ms | 679.00 ms | 1.53 s | 100.00% |
+| 1000 | rust | 1603 | 629.20 ms | 634.50 ms | 1.64 s | 100.00% |
+| 2000 | py | 1524 | 1.34 s | 1.35 s | 2.39 s | 100.00% |
+| 2000 | rust | 1657 | 1.23 s | 1.25 s | 2.16 s | 100.00% |
+| 5000 | py | 1648 | 2.47 s | 1.49 s | 11.18 s | 96.16% |
+| 5000 | rust | 1767 | 2.32 s | 1.40 s | 12.08 s | 97.08% |
+| 10000 | py | 1946 | 2.69 s | 1.56 s | 13.87 s | 86.34% |
+| 10000 | rust | 1981 | 2.77 s | 1.62 s | 16.67 s | 92.92% |
 
-At 5000+ connections both backends begin hitting OS/connection limits;
-the Rust backend sustains a higher success rate under extreme load.
+At 5000+ connections both backends begin hitting OS/connection limits; the Rust backend sustains higher throughput and a noticeably higher success rate under extreme load.
 
 ### GET /health (baseline, no rate limiting)
 
