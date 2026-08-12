@@ -1,13 +1,13 @@
 # https://just.systems
 
 run-rust:
-     cd backend && uv run uvicorn src.main_rust:app --host 0.0.0.0 --port 8000 --reload
+     cd backend && ulimit -Sn 20000 && uv run uvicorn src.main_rust:app --host 0.0.0.0 --port 8000 --reload
 
 run-py:
-    cd backend && uv run uvicorn src.main_py:app --host 0.0.0.0 --port 8000 --reload
+    cd backend && ulimit -Sn 20000 && uv run uvicorn src.main_py:app --host 0.0.0.0 --port 8000 --reload
 
 bench-rs:
-    cd scripts && ./benchmark.sh 10.0.0.6 rust churn
+    cd scripts && ulimit -Sn 20000 && ./benchmark.sh 10.0.0.6 rust churn
 
 bench-py:
-    cd scripts && ./benchmark.sh 10.0.0.6 python churn
+    cd scripts && ulimit -Sn 20000 && ./benchmark.sh 10.0.0.6 python churn
